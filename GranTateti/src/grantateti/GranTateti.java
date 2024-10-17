@@ -47,10 +47,32 @@ public class GranTateti {
         }
     }
 
+    private static final String[] colores = {
+        "\u001B[31m", // Rojo
+        "\u001B[32m", // Verde
+        "\u001B[33m", // Amarillo
+        "\u001B[34m", // Azul
+        "\u001B[35m", // Magenta
+        "\u001B[36m", // Cian
+        "\u001B[37m", // Blanco
+        "\u001B[0m" // Resetear color
+    };
+
     private static void mostrarAnimacionBienvenida() {
-        System.out.println("Bienvenidos al Gran Tateti!");
+        String mensaje = "Bienvenidos al Gran Tateti!";
+        for (int i = 0; i < mensaje.length(); i++) {
+            // Elegir un color al azar
+            String color = colores[i % colores.length];
+            System.out.print(color + mensaje.charAt(i) + "\u001B[0m"); // Cambia el color de la letra y luego resetea
+            try {
+                Thread.sleep(100); // Pausa de 100 milisegundos entre cada letra
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        System.out.println(); // Salto de línea después del mensaje
         try {
-            Thread.sleep(2000); // Pausa de 2 segundos para la animacion
+            Thread.sleep(2000); // Pausa de 2 segundos antes de continuar
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
