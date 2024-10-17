@@ -1,4 +1,9 @@
-
+/*
+Nombre: Lorenzo Aldao
+Nro. de estudiante: 307239
+Nombre: Francisco Nin
+Nro. de estudiante: 322776
+*/
 package grantateti;
 
 import java.util.*;
