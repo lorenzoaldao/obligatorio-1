@@ -10,11 +10,12 @@ import java.util.*;
 
 public class GranTateti {
     static class Jugador {
+        String nombre;
         String alias;
         int edad;
         int partidasGanadas = 0;
 
-        public Jugador(String alias, int edad) {
+        public Jugador(String nombre, String alias, int edad) {
             this.alias = alias;
             this.edad = edad;
         }
@@ -199,6 +200,8 @@ public class GranTateti {
     }
 
     private static void registrarJugador() {
+        System.out.println("Ingrese su nombre: ");
+        String nombre = sc.nextLine();
         System.out.print("Ingrese el alias (único): ");
         String alias = sc.nextLine();
         System.out.print("Ingrese la edad: ");
@@ -212,7 +215,7 @@ public class GranTateti {
             }
         }
 
-        jugadores.add(new Jugador(alias, edad));
+        jugadores.add(new Jugador(nombre, alias, edad));
         System.out.println("Jugador registrado exitosamente.");
     }
 
