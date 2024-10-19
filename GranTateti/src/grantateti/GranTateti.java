@@ -16,6 +16,7 @@ public class GranTateti {
         int partidasGanadas = 0;
 
         public Jugador(String nombre, String alias, int edad) {
+            this.nombre = nombre;
             this.alias = alias;
             this.edad = edad;
         }
