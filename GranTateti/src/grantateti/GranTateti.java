@@ -41,9 +41,15 @@ public class GranTateti {
                     registrarJugador();
                     break;
                 case 2:
-                    mostrarRanking();
+                    jugarTateti(); // Mostrar tablero para dos personas
                     break;
                 case 3:
+                    jugarTateti(); // Mostrar tablero vs Computadora
+                    break;
+                case 4:
+                    mostrarRanking();
+                    break;
+                case 5:
                     System.out.println("Gracias por jugar. Adios!");
                     return;
                 default:
@@ -52,23 +58,47 @@ public class GranTateti {
         }
     }
 
-    private static final String[] colores = {
-        "\u001B[31m", // Rojo
-        "\u001B[32m", // Verde
-        "\u001B[33m", // Amarillo
-        "\u001B[34m", // Azul
-        "\u001B[35m", // Magenta
-        "\u001B[36m", // Cian
-        "\u001B[37m", // Blanco
-        "\u001B[0m" // Resetear color
-    };
+    // Secuencias ANSI para colores de fondo y texto
+    private static final String ANSI_FONDO_VERDE = "\u001B[42m"; // Fondo verde
+
+    private static final String ANSI_RESET = "\u001B[0m";        // Resetear color
+
+    // Mostrar el tablero de Tateti con el fondo de los asteriscos en verde y texto blanco
+    private static void jugarTateti() {
+        String[] tablero = {
+            "*******************",
+            "* | | * | | * | | *",
+            "*-+-+-*-+-+-*-+-+-*",
+            "* | | * | | * | | *",
+            "*-+-+-*-+-+-*-+-+-*",
+            "* | | * | | * | | *",
+            "*******************",
+            "* | | * | | * | | *",
+            "*-+-+-*-+-+-*-+-+-*",
+            "* | | * | | * | | *",
+            "*-+-+-*-+-+-*-+-+-*",
+            "* | | * | | * | | *",
+            "*******************",
+            "* | | * | | * | | *",
+            "*-+-+-*-+-+-*-+-+-*",
+            "* | | * | | * | | *",
+            "*-+-+-*-+-+-*-+-+-*",
+            "* | | * | | * | | *",
+            "*******************"
+        };
+
+        // Imprimir cada línea del tablero, pintando los fondos de '*' en verde con texto blanco
+        for (String linea : tablero) {
+            // Reemplazar '*' por '*' con fondo verde y texto blanco
+            String lineaColoreada = linea.replace("*", ANSI_FONDO_VERDE + "*" + ANSI_RESET);
+            System.out.println(lineaColoreada);
+        }
+    }
 
     private static void mostrarAnimacionBienvenida() {
         String mensaje = "Bienvenidos al Gran Tateti!";
         for (int i = 0; i < mensaje.length(); i++) {
-            // Elegir un color al azar
-            String color = colores[i % colores.length];
-            System.out.print(color + mensaje.charAt(i) + "\u001B[0m"); // Cambia el color de la letra y luego resetea
+            System.out.print(mensaje.charAt(i));
             try {
                 Thread.sleep(100); // Pausa de 100 milisegundos entre cada letra
             } catch (InterruptedException e) {
@@ -86,8 +116,10 @@ public class GranTateti {
     private static void mostrarMenu() {
         System.out.println("\n--- Menu ---");
         System.out.println("1) Registrar un jugador");
-        System.out.println("2) Ranking");
-        System.out.println("3) Fin");
+        System.out.println("2) Jugar al Gran Tateti entre 2 personas.");
+        System.out.println("3) Jugar al Gran Tateti vs la Computadora");
+        System.out.println("4) Ranking");
+        System.out.println("5) Fin");
         System.out.print("Selecciona una opcion: ");
     }
 
