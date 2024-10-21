@@ -102,72 +102,145 @@ public class Grantateti {
         }
     }
 
-    private static void jugarGrantateti() {
-        reiniciarTableroGrande();
-        Jugador jugador1 = seleccionarJugador(1);
-        Jugador jugador2 = seleccionarJugador(2);
+            private static String leerPosicion() {
+            String posicion;
+            while (true) {
+                System.out.print("Selecciona la posicion (ejemplo A2): ");
+                posicion = sc.nextLine().trim();
 
-        char turnoActual = 'X';
-        Jugador jugadorActual = jugador1;
+                if (posicion.length() == 2) {
+                    char fila = posicion.charAt(0);
+                    char columna = posicion.charAt(1);
 
-        // Variables para controlar el tablero en que se debe jugar
-        int tableroX = -1, tableroY = -1;
-
-        while (true) {
-            mostrarTableroGrande();
-            System.out.println(jugadorActual.alias + " (" + turnoActual + "), tu turno.");
-            
-            if (tableroX == -1 && tableroY == -1) {
-                // Si es la primera jugada, el jugador elige el mini-tablero
-                System.out.println("Puedes jugar en cualquier mini-tablero.");
-                System.out.print("Selecciona el mini-tablero fila (1-3): ");
-                tableroX = sc.nextInt() - 1;
-                System.out.print("Selecciona el mini-tablero columna (1-3): ");
-                tableroY = sc.nextInt() - 1;
-            } else {
-                // Después de la primera jugada, el jugador debe jugar en el mini-tablero correspondiente
-                System.out.println("Debes jugar en el mini-tablero [" + (tableroX + 1) + "," + (tableroY + 1) + "]"); 
+                    // Verificar que la fila esté entre A y C y la columna entre 1 y 3
+                    if ((fila >= 'A' && fila <= 'C') && (columna >= '1' && columna <= '3')) {
+                        break; // Salir del bucle si la entrada es válida
+                    }
+                }
+                System.out.println("Entrada no válida. Inténtalo de nuevo.");
             }
-
-            MiniTateti miniTateti = tableroGrande[tableroX][tableroY];
-
-            System.out.print("Ingresa la fila (1-3): ");
-            int fila = sc.nextInt() - 1;
-            System.out.print("Ingresa la columna (1-3): ");
-            int columna = sc.nextInt() - 1;
-
-            if (!miniTateti.mover(fila, columna, turnoActual)) {
-                System.out.println("Movimiento no válido. Inténtalo de nuevo.");
-                continue;
-            }
-
-            if (miniTateti.verificarGanador(turnoActual)) {
-                miniTateti.ganador = turnoActual;
-                System.out.println(jugadorActual.alias + " ha ganado el mini-tablero!");
-            }
-
-            if (verificarGanadorGlobal(turnoActual)) {
-                mostrarTableroGrande();
-                System.out.println(jugadorActual.alias + " ha ganado el Grantateti!");
-                jugadorActual.partidasGanadas++;
-                break;
-            }
-
-            if (tableroLlenoGlobal()) {
-                mostrarTableroGrande();
-                System.out.println("Es un empate global!");
-                break;
-            }
-
-            // Cambiar turno
-            turnoActual = (turnoActual == 'X') ? 'O' : 'X';
-            jugadorActual = (jugadorActual == jugador1) ? jugador2 : jugador1;
-
-            // El próximo turno será en el mini-tablero correspondiente a la última jugada
-            tableroX = fila;
-            tableroY = columna;
+            return posicion;
         }
-    }
+
+       private static void jugarGrantateti() {
+            reiniciarTableroGrande();
+            Jugador jugador1 = seleccionarJugador(1);
+            Jugador jugador2 = seleccionarJugador(2);
+
+            char turnoActual = 'X';
+            Jugador jugadorActual = jugador1;
+
+            // Variables para controlar el tablero en que se debe jugar
+            int tableroX = -1, tableroY = -1;
+
+            // Bandera para la jugada mágica (cada jugador puede usarla solo una vez)
+            boolean jugador1UsoMagica = false;
+            boolean jugador2UsoMagica = false;
+
+            sc.nextLine(); // Limpiar cualquier salto de línea residual en el buffer
+
+            while (true) {
+                mostrarTableroGrande();
+                System.out.println(jugadorActual.alias + " (" + turnoActual + "), tu turno.");
+
+                // Solicitar la posición o una acción especial
+                String posicion;
+                if (tableroX == -1 && tableroY == -1) {
+                    // Si es la primera jugada, el jugador elige el mini-tablero
+                    System.out.println("Puedes jugar en cualquier mini-tablero.");
+                    posicion = leerPosicion();
+                    tableroX = posicion.charAt(0) - 'A';
+                    tableroY = posicion.charAt(1) - '1';
+                } else {
+                    // Después de la primera jugada, el jugador debe jugar en el mini-tablero correspondiente
+                    System.out.println("Debes jugar en el mini-tablero [" + (char)(tableroX + 'A') + "," + (tableroY + 1) + "]");
+                }
+
+                MiniTateti miniTateti = tableroGrande[tableroX][tableroY];
+
+                // Nueva forma de obtener la entrada
+                System.out.print("Ingresa la posición (ejemplo A2) o una acción ('X' para rendirse, 'M' para jugada mágica): ");
+                posicion = sc.nextLine().trim(); // Cambiado a sc.nextLine()
+
+                // Manejar la entrada especial
+                if (posicion.equalsIgnoreCase("X")) {
+                    // Si el jugador se rinde
+                    System.out.println(jugadorActual.alias + " se ha rendido. ¡El oponente gana!");
+                    Jugador ganador = (jugadorActual == jugador1) ? jugador2 : jugador1;
+                    ganador.partidasGanadas++;
+                    break;
+                }
+
+                if (posicion.equalsIgnoreCase("M")) {
+                    // Verificar si el jugador ya usó su jugada mágica
+                    if ((jugadorActual == jugador1 && jugador1UsoMagica) || (jugadorActual == jugador2 && jugador2UsoMagica)) {
+                        System.out.println("Ya usaste tu jugada mágica. Debes jugar una posición normal.");
+                        continue;
+                    }
+
+                    // Solicitar la posición para la jugada mágica
+                    System.out.println("Selecciona la posición para la jugada mágica:");
+                    posicion = leerPosicion();
+                    int fila = posicion.charAt(0) - 'A';
+                    int columna = posicion.charAt(1) - '1';
+
+                    // Colocar la ficha y vaciar el mini-tablero
+                    miniTateti.tablero[fila][columna] = turnoActual;
+                    for (int i = 0; i < 3; i++) {
+                        for (int j = 0; j < 3; j++) {
+                            if (i != fila || j != columna) {
+                                miniTateti.tablero[i][j] = ' '; // Eliminar todas las fichas excepto la jugada mágica
+                            }
+                        }
+                    }
+
+                    // Marcar la jugada mágica como usada
+                    if (jugadorActual == jugador1) {
+                        jugador1UsoMagica = true;
+                    } else {
+                        jugador2UsoMagica = true;
+                    }
+
+                    System.out.println(jugadorActual.alias + " ha usado la jugada mágica en " + posicion + "!");
+                } else {
+                    // Procesar jugada normal
+                    int fila = posicion.charAt(0) - 'A';
+                    int columna = posicion.charAt(1) - '1';
+
+                    if (!miniTateti.mover(fila, columna, turnoActual)) {
+                        System.out.println("Movimiento no válido. Inténtalo de nuevo.");
+                        continue;
+                    }
+                }
+
+                if (miniTateti.verificarGanador(turnoActual)) {
+                    miniTateti.ganador = turnoActual;
+                    System.out.println(jugadorActual.alias + " ha ganado el mini-tablero!");
+                }
+
+                if (verificarGanadorGlobal(turnoActual)) {
+                    mostrarTableroGrande();
+                    System.out.println(jugadorActual.alias + " ha ganado el Grantateti!");
+                    jugadorActual.partidasGanadas++;
+                    break;
+                }
+
+                if (tableroLlenoGlobal()) {
+                    mostrarTableroGrande();
+                    System.out.println("Es un empate global!");
+                    break;
+                }
+
+                // Cambiar turno
+                turnoActual = (turnoActual == 'X') ? 'O' : 'X';
+                jugadorActual = (jugadorActual == jugador1) ? jugador2 : jugador1;
+
+                // El próximo turno será en el mini-tablero correspondiente a la última jugada
+                tableroX = posicion.charAt(0) - 'A';
+                tableroY = posicion.charAt(1) - '1';
+            }
+        }
+
 
     private static boolean verificarGanadorGlobal(char simbolo) {
         // Verificar si alguien ha ganado el tablero grande
@@ -220,6 +293,15 @@ public class Grantateti {
             for (int fila = 0; fila < 3; fila++) {
                 System.out.print(ANSI_FONDO_VERDE + "*" + ANSI_RESET);  // Borde izquierdo con fondo verde
                 for (int j = 0; j < 3; j++) {
+                    char ganadorMiniTablero = tableroGrande[i][j].ganador;  // Verificar ganador del mini-tablero
+                    String colorSeparador = ANSI_RESET;  // Color por defecto
+
+                    if (ganadorMiniTablero == 'X') {
+                        colorSeparador = ANSI_ROJO;  // Rojo si X ganó el mini-tablero
+                    } else if (ganadorMiniTablero == 'O') {
+                        colorSeparador = ANSI_AZUL;  // Azul si O ganó el mini-tablero
+                    }
+
                     for (int columna = 0; columna < 3; columna++) {
                         // Imprime X en rojo y O en azul
                         if (tableroGrande[i][j].tablero[fila][columna] == 'X') {
@@ -230,17 +312,26 @@ public class Grantateti {
                             System.out.print(tableroGrande[i][j].tablero[fila][columna]);
                         }
 
-                        if (columna < 2) System.out.print("|");  // Separación de columnas
+                        if (columna < 2) System.out.print(colorSeparador + "|" + ANSI_RESET);  // Separación de columnas coloreada
                     }
                     if (j < 2) System.out.print(ANSI_FONDO_VERDE + "*" + ANSI_RESET);  // Separación entre mini-tableros con fondo verde
                 }
                 System.out.print(ANSI_FONDO_VERDE + "*" + ANSI_RESET + "\n");  // Borde derecho con fondo verde
-                
+
                 if (fila < 2) {
                     // Separador entre filas de mini-tableros
                     System.out.print(ANSI_FONDO_VERDE + "*" + ANSI_RESET); // Asterisco verde
                     for (int j = 0; j < 3; j++) {
-                        System.out.print("-+-+-"); // Separadores en texto normal
+                        char ganadorMiniTablero = tableroGrande[i][j].ganador;  // Verificar ganador del mini-tablero
+                        String colorSeparador = ANSI_RESET;  // Color por defecto
+
+                        if (ganadorMiniTablero == 'X') {
+                            colorSeparador = ANSI_ROJO;  // Rojo si X ganó el mini-tablero
+                        } else if (ganadorMiniTablero == 'O') {
+                            colorSeparador = ANSI_AZUL;  // Azul si O ganó el mini-tablero
+                        }
+
+                        System.out.print(colorSeparador + "-+-+-" + ANSI_RESET); // Separadores coloreados
                         System.out.print(ANSI_FONDO_VERDE + "*" + ANSI_RESET); // Asterisco verde
                     }
                     System.out.println(); // Nueva línea
@@ -257,7 +348,7 @@ public class Grantateti {
     }
 
     private static void mostrarAnimacionBienvenida() {
-        String mensaje = "¡Bienvenidos al Grantateti!";
+        String mensaje = " Bienvenidos al Grantateti ";
         for (int i = 0; i < mensaje.length(); i++) {
             System.out.print(mensaje.charAt(i));
             try {
@@ -270,13 +361,13 @@ public class Grantateti {
     }
 
     private static void mostrarMenu() {
-        System.out.println("\n--- Menú ---");
+        System.out.println("\n--- Menu ---");
         System.out.println("1. Registrar Jugador");
         System.out.println("2. Jugar al Gran Tateti entre 2 personas");
         System.out.println("3. Jugar al Gran Tateti vs la Computadora");
         System.out.println("4. Mostrar Ranking");
         System.out.println("5. Salir");
-        System.out.print("Selecciona una opción: ");
+        System.out.print("Selecciona una opcion: ");
     }
 
     private static void registrarJugador() {
